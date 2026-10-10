@@ -19,9 +19,9 @@ A modern, full-stack portfolio webapp built with React, TypeScript, Express, and
 - **Helmet** for security headers
 
 ### Database & Auth
-- **Supabase** (PostgreSQL)
-- **Supabase Auth** for authentication
-- **Row Level Security** for data protection
+- **Supabase** (PostgreSQL and Storage)
+- **Supabase Auth** for the admin sign-in
+- **Row Level Security**: visitors can read the portfolio and send a message; only the signed-in admin can change content or read messages
 
 ## 📁 Project Structure
 
@@ -49,7 +49,8 @@ portfolio/
 │   │   └── index.ts          # Entry point
 │   └── ...config files
 └── supabase/
-    └── schema.sql            # Database schema
+    ├── schema.sql            # Database schema, policies and sample data
+    └── migrations/           # Changes for databases created earlier
 ```
 
 ## 🛠️ Setup Instructions
@@ -77,6 +78,9 @@ npm install
 2. Go to SQL Editor and run the schema from `supabase/schema.sql`
 3. Enable Email Auth in Authentication > Providers
 4. Create your admin user in Authentication > Users
+5. Turn off **Allow new users to sign up** in the Auth settings, so the admin is the only account that can sign in
+
+Already have a database from the earlier schema? Run `supabase/migrations/001_lock_down_policies.sql` once. It replaces the old policies, which let anyone change content.
 
 ### 3. Environment Variables
 
@@ -112,7 +116,7 @@ npm run dev
 
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:3001
-- Admin Dashboard: http://localhost:5173/admin
+- Admin Dashboard: http://localhost:5173/admin (sign in with the Supabase admin user's email and password)
 
 ## 🚀 Deployment
 

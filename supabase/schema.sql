@@ -155,8 +155,8 @@ INSERT INTO storage.buckets (id, name, public) VALUES ('uploads', 'uploads', tru
 ON CONFLICT (id) DO NOTHING;
 
 CREATE POLICY "Public read uploads" ON storage.objects FOR SELECT USING (bucket_id = 'uploads');
-CREATE POLICY "Allow uploads" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'uploads');
-CREATE POLICY "Allow delete uploads" ON storage.objects FOR DELETE USING (bucket_id = 'uploads');
+CREATE POLICY "Admin uploads" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'uploads');
+CREATE POLICY "Admin deletes uploads" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'uploads');
 
 -- ============================================
 -- ROW LEVEL SECURITY
@@ -169,14 +169,27 @@ ALTER TABLE experiences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE social_links ENABLE ROW LEVEL SECURITY;
 
--- Allow all operations (simple password auth handled in frontend)
-CREATE POLICY "Allow all hero" ON hero FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all about" ON about FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all skills" ON skills FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all projects" ON projects FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all experiences" ON experiences FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all contacts" ON contacts FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all social_links" ON social_links FOR ALL USING (true) WITH CHECK (true);
+-- Visitors can read the public content; only a signed-in admin can change it.
+-- Turn off "Allow new users to sign up" in Supabase Auth so the admin is the only account.
+CREATE POLICY "Public read hero" ON hero FOR SELECT USING (true);
+CREATE POLICY "Public read about" ON about FOR SELECT USING (true);
+CREATE POLICY "Public read skills" ON skills FOR SELECT USING (true);
+CREATE POLICY "Public read projects" ON projects FOR SELECT USING (true);
+CREATE POLICY "Public read experiences" ON experiences FOR SELECT USING (true);
+CREATE POLICY "Public read social_links" ON social_links FOR SELECT USING (true);
+
+CREATE POLICY "Admin manages hero" ON hero FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manages about" ON about FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manages skills" ON skills FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manages projects" ON projects FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manages experiences" ON experiences FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin manages social_links" ON social_links FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Anyone can send a message; only the admin can read, mark or delete messages.
+CREATE POLICY "Anyone sends a message" ON contacts FOR INSERT TO anon, authenticated WITH CHECK (true);
+CREATE POLICY "Admin reads messages" ON contacts FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Admin updates messages" ON contacts FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin deletes messages" ON contacts FOR DELETE TO authenticated USING (true);
 
 -- ============================================
 -- SEED DATA
