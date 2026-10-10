@@ -9,22 +9,23 @@ import { toast } from '@/components/ui/Toaster';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AdminLogin() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const success = login(password);
+    const success = await login(email, password);
     
     if (success) {
       navigate('/admin');
     } else {
-      toast({ title: 'Error', description: 'Invalid password', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Invalid email or password', variant: 'destructive' });
     }
     
     setIsLoading(false);
@@ -42,6 +43,18 @@ export default function AdminLogin() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@example.com"
+                required
+              />
+            </div>
+            <div>
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
@@ -49,6 +62,7 @@ export default function AdminLogin() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
                   placeholder="Enter admin password"
                   required
                 />
